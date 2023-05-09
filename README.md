@@ -21,6 +21,8 @@ El proyecto se centra en la creación de una solución integral de datos, incluy
 - Crear una solución de datos completa que incluya un data pipeline, una base de datos, un data warehouse, un dashboard y modelos predictivos.
 - Comunicar eficazmente la relación entre los flujos migratorios y los aspectos socioeconómicos y geopolíticos de los países analizados.
 
+---
+
 ### **PAÍSES DE REFERENCIAS**.
 
 Para este proyecto, se tomarán como referencia 5 países receptores y 5 países emisores. Los criterios de selección son los siguientes:
@@ -34,3 +36,25 @@ Para este proyecto, se tomarán como referencia 5 países receptores y 5 países
 
 - Tener el mayor número de emigrantes.
 - Considerar aquellos países que son más recurrentes como destinos en los países receptores.
+
+---
+
+### **MISIÓN**.
+
+Nuestra misión es proporcionar información de calidad relacionada con temas migratorios para respaldar la toma de decisiones informadas por parte de organizaciones internacionales, gobiernos y otras partes interesadas.
+
+---
+
+### **VISIÓN**.
+
+Nuestra visión es convertirnos en la consultora especializada líder en temas migratorios, reconocida por la calidad de los servicios que brindamos y por nuestra contribución a la comprensión y gestión de los flujos migratorios a nivel global.
+
+---
+
+### **REQUISITOS**
+
+---
+
+### **INTEGRANTES**
+
+---
