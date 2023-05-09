@@ -2,7 +2,7 @@
 ------------
 
 <p align="center">
-  <img src="https://github.com/emilianod98/Migratio-PFHenry/blob/main/migratio.png">
+  <img src="./src/migratio.png">
 </p>
 
 
