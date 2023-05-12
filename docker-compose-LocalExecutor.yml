@@ -1,40 +1,70 @@
+# Esta línea especifica la versión de la sintaxis del archivo de configuración de Docker Compose. En este caso, se utiliza la versión 3.7.
 version: '3.7'
+# Indica el comienzo de la sección donde se definen los servicios que se ejecutarán en Docker.
 services:
+    # Es el nombre del servicio que se va a definir. En este caso, se utiliza "postgres".
     postgres:
+        # Especifica la imagen de Docker que se utilizará para este servicio. En este caso, se utiliza la imagen "postgres:9.6", que es una versión específica de PostgreSQL.
         image: postgres:9.6
+        # Indica el comienzo de la sección donde se especifican las variables de entorno para el servicio.
         environment:
+            # Establece la variable de entorno POSTGRES_USER con el valor "airflow". Esto define el nombre de usuario para la base de datos PostgreSQL que se creará.
             - POSTGRES_USER=airflow
+            # Establece la variable de entorno POSTGRES_PASSWORD con el valor "airflow". Esto define la contraseña para el usuario de la base de datos PostgreSQL.
             - POSTGRES_PASSWORD=airflow
+            # Establece la variable de entorno POSTGRES_DB con el valor "airflow". Esto define el nombre de la base de datos PostgreSQL que se creará.
             - POSTGRES_DB=airflow
+        # Indica el comienzo de la sección donde se especifican las opciones de registro para el servicio.
         logging:
+            # Indica el comienzo de la sección donde se especifican las opciones de registro adicionales.
             options:
+                # Establece el tamaño máximo de cada archivo de registro generado por el servicio en 10 megabytes.
                 max-size: 10m
+                # Establece el número máximo de archivos de registro que se conservarán para el servicio en 3.
                 max-file: "3"
 
+
+
+    # Esto indica que se está configurando un servicio llamado "webserver" dentro del archivo de configuración Docker Compose.
     webserver:
+        # Aquí se especifica la imagen Docker utilizada para el contenedor del servicio. En este caso, se utiliza la imagen "puckel/docker-airflow" con la etiqueta "1.10.9". Esta imagen contiene una instalación de Airflow preconfigurada.
         image: puckel/docker-airflow:1.10.9
+        # Esta línea indica que el contenedor se reiniciará automáticamente en caso de fallos.
         restart: always
+        # Aquí se establece la dependencia del servicio "webserver" en otro servicio llamado "postgres". Esto significa que el servicio "webserver" se iniciará después de que el servicio "postgres" esté en funcionamiento.
         depends_on:
             - postgres
+        # Se definen variables de entorno para el contenedor.
         environment:
+            # Establece la variable de entorno "LOAD_EX" en "n". Esta variable se utiliza para deshabilitar la carga de ejemplos de flujo de trabajo en Airflow.
             - LOAD_EX=n
+            # Establece la variable de entorno "EXECUTOR" en "Local". Esta variable especifica el tipo de executor que se utilizará en Airflow.
             - EXECUTOR=Local
+        # Aquí se configuran las opciones de registro del contenedor.
         logging:
             options:
+                # Establece el tamaño máximo de cada archivo de registro en 10 megabytes.
                 max-size: 10m
+                # Especifica el número máximo de archivos de registro que se conservarán antes de ser sobrescritos.
                 max-file: "3"
+        # Se definen los volúmenes que se montarán en el contenedor.
         volumes:
-            - ./dags:/usr/local/airflow/dags                                            
-            - ./requirements.txt:/requirements.txt
-            - ./data.csv:/data.csv
+            #  Monta el directorio local "./dags" dentro del contenedor en la ruta "/usr/local/airflow/dags". Esto permite compartir archivos DAG (grafos de flujo de trabajo) con el contenedor.
+            - ./dags:/usr/local/airflow/dags
             # - ./plugins:/usr/local/airflow/plugins
+        # Aquí se especifican los puertos en los que se expondrá el contenedor.
         ports:
+            # Mapea el puerto 8080 del host al puerto 8080 del contenedor, lo que permite acceder a la interfaz web de Airflow desde el host a través del puerto 8080.
             - "8080:8080"
-        
+        # Esta línea indica el comando que se ejecutará dentro del contenedor. En este caso, se ejecutará el comando "webserver", que iniciará el servidor web de Airflow.
         command: webserver
-        
+        # Aquí se define una configuración de verificación de estado para el contenedor.
         healthcheck:
+            # Esta línea especifica la prueba que se realizará para verificar el estado del componente o servicio. En este caso, se utiliza el comando CMD-SHELL para ejecutar un comando de shell. El comando en sí es [ -f /usr/local/airflow/airflow-webserver.pid ], que verifica si el archivo /usr/local/airflow/airflow-webserver.pid existe. Si el archivo existe, se considerará que el "healthcheck" ha pasado.
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            # Esta línea indica el intervalo de tiempo entre cada ejecución del "healthcheck". En este caso, se establece en 30 segundos, lo que significa que el "healthcheck" se ejecutará cada 30 segundos.
             interval: 30s
+            # Esta línea establece el tiempo máximo permitido para que el "healthcheck" se ejecute antes de considerarse un fallo. Si el "healthcheck" no se completa dentro de los 30 segundos, se considerará que ha fallado.
             timeout: 30s
+            # Esta línea especifica el número máximo de intentos que se realizarán si el "healthcheck" falla. En este caso, se establece en 3, lo que significa que se realizarán hasta 3 intentos antes de considerar que el "healthcheck" ha fallado definitivamente.
             retries: 3

@@ -1,92 +1,155 @@
+# Este código está escrito en formato YAML y se utiliza para definir servicios en un entorno de Docker Compose.
+
+# Esta línea especifica la versión de Docker Compose que se está utilizando. En este caso, se está utilizando la versión 2.1.
 version: '2.1'
+# Esta línea marca el comienzo de la sección donde se definen los servicios que se ejecutarán en Docker.
 services:
+    # Esta línea define el servicio llamado "redis". El nombre "redis" se puede utilizar más adelante para hacer referencia a este servicio en otras partes del archivo de Docker Compose.
     redis:
+        # Esta línea especifica la imagen de Docker que se utilizará para el servicio "redis". En este caso, se utiliza la imagen "redis:5.0.5", que es la versión 5.0.5 de Redis.
         image: 'redis:5.0.5'
         # command: redis-server --requirepass redispass
-
+    # Esta línea define el servicio llamado "postgres". Al igual que con el servicio "redis", este nombre se puede utilizar para hacer referencia a este servicio más adelante.
     postgres:
+        # Esta línea especifica la imagen de Docker que se utilizará para el servicio "postgres". En este caso, se utiliza la imagen "postgres:9.6", que es la versión 9.6 de PostgreSQL.
         image: postgres:9.6
+        # Esta línea marca el comienzo de la sección donde se definen las variables de entorno para el servicio "postgres". Las variables de entorno especificadas aquí se pasan al contenedor Docker cuando se ejecuta.
         environment:
+            # Esta línea define una variable de entorno llamada "POSTGRES_USER" con el valor "airflow". Esto establecerá el nombre de usuario de PostgreSQL como "airflow".
             - POSTGRES_USER=airflow
+            # Esta línea define una variable de entorno llamada "POSTGRES_PASSWORD" con el valor "airflow". Esto establecerá la contraseña de PostgreSQL como "airflow".
             - POSTGRES_PASSWORD=airflow
+            # Esta línea define una variable de entorno llamada "POSTGRES_DB" con el valor "airflow". Esto establecerá el nombre de la base de datos de PostgreSQL como "airflow".
             - POSTGRES_DB=airflow
-        # Uncomment these lines to persist data on the local filesystem.
-        #     - PGDATA=/var/lib/postgresql/data/pgdata
+        # las líneas siguientes se pueden descomentar para persistir los datos en el sistema de archivos local.
+
+            # Esta línea es un comentario que muestra cómo se puede establecer la variable de entorno "PGDATA" para especificar la ubicación de los datos de PostgreSQL en el contenedor.
+        #   - PGDATA=/var/lib/postgresql/data/pgdata
+
+        # Esta línea marca el comienzo de la sección donde se definen los volúmenes para el servicio "postgres". Los volúmenes se utilizan para persistir los datos más allá del ciclo de vida de un contenedor.
         # volumes:
+
+        # Esta línea es un comentario que muestra cómo se puede vincular un directorio local llamado "pgdata" al directorio "/var/lib/postgresql/data/pgdata" dentro del contenedor. Esto permitiría que los datos de PostgreSQL se almacenen y persistan localmente en el directorio "pgdata".
         #     - ./pgdata:/var/lib/postgresql/data/pgdata
 
+
+
+    #  Este es el nombre del servicio que se está definiendo. En este caso, el servicio se llama "webserver".
     webserver:
+        # Especifica la imagen Docker utilizada para crear el contenedor. En este caso, se utiliza la imagen "puckel/docker-airflow" en su versión 1.10.9.
         image: puckel/docker-airflow:1.10.9
+        # Indica que el contenedor debe reiniciarse siempre que se detenga inesperadamente.
         restart: always
+        # Especifica las dependencias del servicio. En este caso, el servicio "webserver" depende de los servicios "postgres" y "redis" que deben iniciarse antes de que el servicio "webserver" pueda iniciarse.
         depends_on:
             - postgres
             - redis
+        # Define las variables de entorno para el contenedor. En este caso, se establecen las siguientes variables:
         environment:
+            # Define la variable de entorno "LOAD_EX" con el valor "n".
             - LOAD_EX=n
+            # Define la variable de entorno "FERNET_KEY" con un valor específico.
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+            # Define la variable de entorno "EXECUTOR" con el valor "Celery".
             - EXECUTOR=Celery
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
+
+        # Define los volúmenes montados en el contenedor. En este caso, se monta el directorio local "./dags" en el directorio "/usr/local/airflow/dags" dentro del contenedor. Esto permite compartir archivos DAG (Direct Acyclic Graphs) con el contenedor.
         volumes:
             - ./dags:/usr/local/airflow/dags
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
+
+        # Esta línea configura el mapeo de puertos del contenedor. Establece que el puerto 8080 del contenedor se mapeará al puerto 8080 del host.
         ports:
             - "8080:8080"
+        # Esta línea especifica el comando que se ejecutará dentro del contenedor. En este caso, se ejecutará el comando "webserver".
         command: webserver
+        # Estas líneas configuran el "healthcheck" del contenedor. El healthcheck es una función que comprueba periódicamente si el contenedor está en un estado saludable. En este caso, se está utilizando un "CMD-SHELL" para ejecutar un comando y comprobar si existe un archivo específico ("/usr/local/airflow/airflow-webserver.pid"). El healthcheck se ejecutará cada 30 segundos y se realizarán hasta 3 intentos antes de considerar que el contenedor no está saludable.
         healthcheck:
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
             interval: 30s
             timeout: 30s
             retries: 3
 
+    # Esto indica el inicio de una sección llamada "flower". El nombre "flower" es un identificador que se utilizará para referirse a este servicio en otros lugares del archivo YAML.
     flower:
+        # Esta línea especifica la imagen de Docker que se utilizará para el servicio "flower". En este caso, se utiliza la imagen "puckel/docker-airflow" con la etiqueta o versión "1.10.9".
         image: puckel/docker-airflow:1.10.9
+        # Esta línea indica que el servicio "flower" debe reiniciarse automáticamente siempre que se detenga o falle.
         restart: always
+        # Esta línea indica que el servicio "flower" depende de otro servicio llamado "redis". Esto significa que el servicio "redis" se iniciará antes de que se inicie el servicio "flower".
         depends_on:
+            # Esta línea especifica el nombre del servicio en el que "flower" depende. En este caso, el servicio se llama "redis".
             - redis
+        # Esta línea indica que se van a definir variables de entorno para el servicio "flower".
         environment:
+            # Esta línea define una variable de entorno llamada "EXECUTOR" con el valor "Celery". Las variables de entorno son utilizadas por la aplicación dentro del contenedor para obtener configuraciones o información.
             - EXECUTOR=Celery
             # - REDIS_PASSWORD=redispass
+        # Esta línea indica que se van a mapear los puertos del contenedor al host.
         ports:
+            # Esta línea especifica la configuración de mapeo de puertos. Significa que el puerto 5555 del contenedor será accesible desde el puerto 5555 del host.
             - "5555:5555"
+        # Esta línea especifica el comando que se ejecutará dentro del contenedor cuando se inicie el servicio "flower". En este caso, el comando es simplemente "flower", que probablemente sea un comando específico de la imagen "puckel/docker-airflow" para iniciar una interfaz web llamada "flower".
         command: flower
 
+    # Esto indica el nombre del servicio. En este caso, se está definiendo un servicio llamado "scheduler".
     scheduler:
+        # Especifica la imagen de Docker que se utilizará para crear el contenedor del servicio. En este caso, se está utilizando la imagen "puckel/docker-airflow" con la etiqueta "1.10.9". Esta imagen es una imagen preconfigurada de Airflow con Docker.
         image: puckel/docker-airflow:1.10.9
+        # Indica que el contenedor se reiniciará automáticamente siempre que se detenga o falle.
         restart: always
+        # Especifica las dependencias del servicio. En este caso, el servicio "scheduler" depende del servicio "webserver". Esto significa que el contenedor del servicio "scheduler" se iniciará después de que el contenedor del servicio "webserver" se haya iniciado.
         depends_on:
             - webserver
+        # Define los volúmenes que se montarán en el contenedor. En este caso, se está montando el directorio local "./dags" en el directorio "/usr/local/airflow/dags" dentro del contenedor. Esto permite que los archivos DAG de Airflow se compartan entre el host y el contenedor.
         volumes:
             - ./dags:/usr/local/airflow/dags
-            # Uncomment to include custom plugins
+            # Incluir complementos personalizados en el contenedor.
             # - ./plugins:/usr/local/airflow/plugins
+        # Establece las variables de entorno dentro del contenedor. En este caso, se están configurando las siguientes variables:
         environment:
+            # Esta variable se utiliza para indicar si se deben cargar ejemplos de DAG en la inicialización de Airflow. En este caso, se establece en "n" para desactivar la carga de ejemplos.
             - LOAD_EX=n
+            # Esta variable especifica la clave Fernet que se utiliza para cifrar y descifrar datos confidenciales en Airflow. La clave proporcionada aquí es solo un ejemplo y se debe utilizar una clave segura en un entorno de producción.
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+            # Esta variable indica que se utilizará el executor de Celery para ejecutar las tareas en Airflow. Celery es un sistema de distribución de tareas en tiempo real y se utiliza comúnmente en Airflow para ejecutar tareas de forma paralela.
             - EXECUTOR=Celery
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
+        # Este comando se ejecutará dentro del contenedor cuando se inicie. En este caso, se está especificando que se ejecute el componente del scheduler de Airflow.
         command: scheduler
 
+    # Indica que se está definiendo un servicio de trabajador.
     worker:
+        # Especifica la imagen de Docker que se utilizará para el servicio del trabajador. En este caso, se utiliza la imagen "puckel/docker-airflow" con la etiqueta "1.10.9". Esta imagen contiene una instalación de Apache Airflow.
         image: puckel/docker-airflow:1.10.9
+        # Indica que el contenedor se reiniciará automáticamente siempre que se detenga o falle.
         restart: always
+        # Especifica las dependencias del servicio del trabajador. En este caso, el trabajador depende del servicio "scheduler".
         depends_on:
             - scheduler
+        # Define los volúmenes de Docker que se montarán en el contenedor del trabajador. En este caso, se monta el directorio local "./dags" en el directorio "/usr/local/airflow/dags" dentro del contenedor. Esto permite que los DAGs (grafos acíclicos dirigidos) de Airflow se compartan con el contenedor.
         volumes:
             - ./dags:/usr/local/airflow/dags
-            # Uncomment to include custom plugins
+            # Incluir complementos personalizados en el contenedor.
             # - ./plugins:/usr/local/airflow/plugins
+        # Define las variables de entorno que se pasarán al contenedor del trabajador. En este caso, se definen dos variables de entorno: "FERNET_KEY" y "EXECUTOR".
         environment:
+            # Establece el valor de la variable de entorno "FERNET_KEY" como "46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=".
             - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+            # Establece el valor de la variable de entorno "EXECUTOR" como "Celery". Esto indica que se utilizará el ejecutor Celery para ejecutar las tareas en el entorno de Airflow.
             - EXECUTOR=Celery
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
+        
+        # Especifica el comando que se ejecutará dentro del contenedor del trabajador. En este caso, el comando es "worker", que indica que el contenedor debe actuar como un trabajador de Airflow.
         command: worker
