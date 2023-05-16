@@ -1,0 +1,46 @@
+---
+title: "EdaReporte"
+output: html_document
+date: "2023-05-16"
+toc: yes
+toc_depth: 2
+lang: es-ES
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+*  **A continuacion haremos un analisis exploratorio de los datos de las tablas extraidas para los KPIs sugeridos**
+
+
+# Carga de data
+```{r}
+df_total <- read.csv('total_mundo.csv')
+df_expulsores <- read.csv('expulsores.csv')
+df_homicidios <- read.csv('homicides100K.csv')
+df_receptores <- read.csv('receptores.csv')
+df_remesas <- read.csv('remesas.csv')
+```
+
+# Analizando homicidios
+
+library(ggplot2)
+
+# Crea un histograma de la columna 'Tasa.por.cada.100K'
+```{r}
+library(ggplot2)
+
+# Calcula la media de la columna 'Tasa.por.cada.100K'
+mean_value <- mean(df_homicidios$Tasa.por.cada.100K)
+
+# Crea un histograma de la columna 'Tasa.por.cada.100K' con línea para la media
+ggplot(df_homicidios, aes(x = Tasa.por.cada.100K)) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  labs(x = "Tasa por cada 100K", y = "Frecuencia") +
+  ggtitle("Distribución de la tasa por cada 100K") +
+  annotate("text", x = mean_value, y = 10, label = "Media", color = "red")
+
+```
