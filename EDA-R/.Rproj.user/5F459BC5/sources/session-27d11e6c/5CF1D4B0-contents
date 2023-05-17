@@ -30,4 +30,5 @@ ggplot(df_top5, aes(x = `Tasa.por.cada.100K`)) +
   labs(x = "Tasa por cada 100K", y = "Frecuencia") +
   ggtitle("Distribución de la tasa por cada 100K")
 
+colnames(df_homicidios)
 

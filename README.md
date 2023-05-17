@@ -51,11 +51,13 @@ Nuestra visión es convertirnos en la consultora especializada líder en temas m
 
 ---
 
-### **REQUISITOS**
-
----
 
 ### **INTEGRANTES**
+Emiliano Daniele  
+Fernando Alloatti  
+Alfredo Huaman  
+Abel Piacenza   
+Pablo Sánchez  
 
 ---
 
