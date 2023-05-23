@@ -9,9 +9,16 @@
     df_receptores <- read.csv('receptores.csv')
     df_remesas <- read.csv('remesas.csv')
 
-# Homicidios
+# Tabla de Homicidios
 
-## Resumen de Homicidios
+    head(df_homicidios,3)
+
+    ##   Country.Name Country.Code Year Homicides Poblacion Tasa.por.cada.100K
+    ## 1  Afghanistan          AFG 2007      3657  25903301           14.11789
+    ## 2  Afghanistan          AFG 2008      3785  26427199           14.32237
+    ## 3  Afghanistan          AFG 2009      3874  27385307           14.14627
+
+## Resumen del dataframe de Homicidios
 
     summary(df_homicidios)
 
@@ -32,6 +39,34 @@
     ##  Max.   :1.408e+09   Max.   :  Inf     
     ##                      NA's   :90
 
+## Valores Nulos
+
+    apply(X = is.na(df_homicidios), MARGIN = 2, FUN = sum)
+
+    ##       Country.Name       Country.Code               Year          Homicides 
+    ##                  0                  0                  0                  0 
+    ##          Poblacion Tasa.por.cada.100K 
+    ##                  0                 90
+
+## Valores Duplicados
+
+    sum(duplicated(df_homicidios))
+
+    ## [1] 0
+
+### Para nuestro analisis eliminares los valores ‘inf’ segun la columna ‘Tasa.por.cada.100K’
+
+    # Eliminar filas con valor 'Inf' en una columna específica
+    df_homicidios_sin_inf <- subset(df_homicidios, is.finite(df_homicidios$Tasa.por.cada.100K))
+
+## Promedio de la tasa de homicidios
+
+    # Imprimir el nuevo DataFrame sin las filas que contienen 'Inf'
+    promedio <- mean(df_homicidios_sin_inf$Tasa.por.cada.100K)
+    promedio
+
+    ## [1] 8.090187
+
 ## Histograma de la columna ‘Tasa.por.cada.100K’
 
     library(ggplot2)
@@ -47,14 +82,7 @@
       ggtitle("Distribución de la tasa por cada 100K") +
       annotate("text", x = mean_value, y = 10, label = "Media", color = "red")
 
-![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-3-1.png)
-
-## Promedio de la tasa de homicidios
-
-    promedio <- mean(df_homicidios$Tasa.por.cada.100K, na.rm = TRUE)
-    print(paste("El promedio de Tasa.por.cada.100K es:", promedio))
-
-    ## [1] "El promedio de Tasa.por.cada.100K es: Inf"
+![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 
 ## Correlacion entre cantidad de Homicidios y Poblacion
 
@@ -64,7 +92,10 @@
       xlab("Poblacion") +
       ylab("Homicides")
 
-![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+
+-   Se aprecia que no existe una aparente correlacion entre ambas
+    variables
 
 ## Diagrama de Cajas
 
@@ -77,4 +108,39 @@
       ggtitle("Diagrama de Cajas de Tasa por cada 100K") +
       scale_y_continuous(breaks = seq(0, 100, by = 5))
 
-![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-6-1.png)
+![](ReporteEDA_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+
+# Tabla de Remesas
+
+    head(df_remesas,3)
+
+    ##   Country.Name Country.Code Year Value
+    ## 1  Afghanistan          AFG 1960    NA
+    ## 2  Afghanistan          AFG 1961    NA
+    ## 3  Afghanistan          AFG 1962    NA
+
+## Resumen Remesas
+
+    summary(df_remesas)
+
+    ##  Country.Name       Country.Code            Year          Value          
+    ##  Length:16492       Length:16492       Min.   :1960   Min.   :0.000e+00  
+    ##  Class :character   Class :character   1st Qu.:1975   1st Qu.:2.145e+07  
+    ##  Mode  :character   Mode  :character   Median :1990   Median :1.980e+08  
+    ##                                        Mean   :1990   Mean   :7.055e+09  
+    ##                                        3rd Qu.:2006   3rd Qu.:1.771e+09  
+    ##                                        Max.   :2021   Max.   :4.608e+11  
+    ##                                                       NA's   :7584
+
+## Remesa mayor a que Pais pertenece
+
+    # Encontrar el valor máximo de una columna
+    max(df_remesas$Value, na.rm = TRUE)
+
+    ## [1] 460844649359
+
+## Menores Remesas a que Pais Pertenece
+
+    min(df_remesas$Value, na.rm = TRUE)
+
+    ## [1] 0
