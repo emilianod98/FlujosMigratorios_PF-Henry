@@ -1,0 +1,7 @@
+"0","# Gráfico de barras de la distribución de 'Country'
+barplot(table(df$Country), main = ""Distribución de países"")
+"
+"2","Error in df$Country : object of type 'closure' is not subsettable
+"
+"2","Warning: unable to translate 'barplot(table(df$Country), main = ""Distribuci<f3>n de pa<ed>ses"")' to a wide string"
+"2","Warning: input string 1 is invalid"

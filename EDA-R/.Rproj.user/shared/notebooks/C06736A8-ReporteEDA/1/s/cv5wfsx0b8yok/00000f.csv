@@ -1,0 +1,7 @@
+"0","# Encontrar el valor máximo de una columna
+max(df_remesas$Value, na.rm = TRUE)
+"
+"1","[1]"
+"1"," 460844649359"
+"1","
+"
