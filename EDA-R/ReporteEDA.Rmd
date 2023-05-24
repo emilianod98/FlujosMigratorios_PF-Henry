@@ -1,0 +1,300 @@
+---
+title: "Reporte Eda Migratio"
+output: md_document
+date: "2023-05-16"
+toc: yes
+toc_depth: 2
+lang: es-ES
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+*  **Mostramos un analisis exploratorio de los datos de las tablas extraidas para los KPIs sugeridos**
+
+
+# Carga de data
+```{r}
+df_total <- read.csv('total_mundo.csv')
+df_expulsores <- read.csv('expulsores.csv')
+df_homicidios <- read.csv('homicides100K.csv')
+df_receptores <- read.csv('receptores.csv')
+df_remesas <- read.csv('remesas.csv')
+```
+
+# Tabla de Homicidios
+
+```{r}
+
+head(df_homicidios,3)
+
+```
+
+
+## Resumen del dataframe de Homicidios
+
+```{r}
+
+summary(df_homicidios)
+
+```
+
+## Valores Nulos
+
+```{r}
+
+apply(X = is.na(df_homicidios), MARGIN = 2, FUN = sum)
+
+```
+
+## Valores Duplicados
+
+```{r}
+
+sum(duplicated(df_homicidios))
+
+```
+
+
+### Para nuestro analisis eliminares los valores 'inf' segun la columna 'Tasa.por.cada.100K'
+
+```{r}
+
+# Eliminar filas con valor 'Inf' en una columna específica
+df_homicidios_sin_inf <- subset(df_homicidios, is.finite(df_homicidios$Tasa.por.cada.100K))
+
+```
+
+## Promedio de la tasa de homicidios
+
+```{r}
+
+# Imprimir el nuevo DataFrame sin las filas que contienen 'Inf'
+promedio <- mean(df_homicidios_sin_inf$Tasa.por.cada.100K)
+promedio
+
+```
+
+## Histograma de la columna 'Tasa.por.cada.100K'
+
+```{r, warning=FALSE}
+
+library(ggplot2)
+
+# Calcula la media de la columna 'Tasa.por.cada.100K'
+mean_value <- mean(df_homicidios$Tasa.por.cada.100K)
+
+# Crea un histograma de la columna 'Tasa.por.cada.100K' con línea para la media
+ggplot(df_homicidios, aes(x = Tasa.por.cada.100K)) +
+  geom_histogram(binwidth = 1, fill = "lightblue", color = "black") +
+  geom_vline(xintercept = mean_value, color = "red", linetype = "dashed") +
+  labs(x = "Tasa por cada 100K", y = "Frecuencia") +
+  ggtitle("Distribución de la tasa por cada 100K") +
+  annotate("text", x = mean_value, y = 10, label = "Media", color = "red")
+```
+
+## Correlacion entre cantidad de Homicidios y Poblacion
+
+```{r, warning=FALSE}
+
+library(ggplot2)
+ggplot(df_homicidios, aes(x = Poblacion, y = Homicides)) +
+  geom_point() +
+  xlab("Poblacion") +
+  ylab("Homicides")
+
+```
+
+* Se aprecia que no existe una aparente correlacion entre ambas variables
+
+## Diagrama de Cajas 
+
+```{r, warning=FALSE}
+
+library(ggplot2)
+
+ggplot(df_homicidios, aes(x = "", y = Tasa.por.cada.100K)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  ylab("Tasa por cada 100K") +
+  xlab("") +
+  ggtitle("Diagrama de Cajas de Tasa por cada 100K") +
+  scale_y_continuous(breaks = seq(0, 100, by = 5))
+
+```
+
+
+# Tabla de Remesas
+
+
+```{r}
+
+head(df_remesas,3)
+
+```
+
+## Resumen Remesas
+
+```{r}
+summary(df_remesas)
+```
+
+## Remesa mayor a que Pais pertenece
+
+```{r}
+
+# Encontrar el valor máximo de una columna
+max(df_remesas$Value, na.rm = TRUE)
+
+
+```
+
+
+
+## Menores Remesas a que Pais Pertenece
+
+```{r}
+min(df_remesas$Value, na.rm = TRUE)
+
+```
+
+# Paises de donde salen mayores remesas
+
+```{r}
+df_remesas <- read.csv('remesas.csv')
+df_remesas <- df_remesas[order(df_remesas$Value, decreasing = TRUE), ]
+remesas_2020 <- subset(df_remesas, Year == 2020)
+
+# Seleccionar los 10 primeros países con mayor población total
+top_remesas_10 <- head(remesas_2020[18:28,], 10)
+
+# Crear un gráfico de barras de los 10 primeros países según su población total
+barplot(top_remesas_10$Value, names.arg = top_remesas_10$Country.Name, xlab = "Pais", ylab = "Remesas Fugadas", 
+        main = "Top 10 Paises con Mayor Poblacion Total en 2019", col = "steelblue" , las = 2, cex.axis = 0.6 , cex.names = 0.5)
+
+```
+
+* Observamos que de estados unidos fugan mas remesas, al igual que Arabia Saudita, Suiza y China
+
+# Paises de donde salen menores remesas
+
+
+```{r}
+
+df_remesas <- read.csv('remesas.csv')
+df_remesas <- df_remesas[order(df_remesas$Value, decreasing = FALSE), ]
+remesas_2020 <- subset(df_remesas, Year == 2020)
+
+# Seleccionar los 10 primeros países con mayor población total
+bottom_remesas_10 <- head(remesas_2020[18:30,], 10)
+
+# Crear un gráfico de barras de los 10 primeros países según su población total
+barplot(bottom_remesas_10$Value, names.arg = bottom_remesas_10$Country.Name, xlab = "Pais", ylab = "Poblacion Total", 
+        main = "Top 10 Paises con Mayor Poblacion Total en 2019", col = "steelblue" , las = 2, cex.axis = 0.6 , cex.names = 0.5)
+
+```
+
+* Observamos que los paises mas chicos en territorio suelen emitir menores remesas, probablemente al ser un mercado no tan grande no suelen tener muchos migrantes que vayan y envien remesas a sus familiares en el exterior.
+
+
+# Tabla de Paises Expulsores
+
+```{r}
+
+head(df_expulsores,3)
+
+```
+
+## Resumen de la estructura de la tabla de paises Expulsores
+
+```{r}
+
+summary(df_expulsores)
+```
+
+## Paises con mayor poblacion en general en el 2019 
+
+```{r}
+
+df_expulsores <- read.csv('expulsores.csv')
+# Filtrar los datos para obtener solo los registros de 2019
+df_2019 <- subset(df_expulsores, Year == 2019)
+# Eliminar ',0' al final de los valores en la columna 'Poblacion.Total'
+df_2019$Poblacion.Total <- sub(",0$", "", df_2019$Poblacion.Total)
+# Convertir la columna 'Poblacion.Total' a numérica
+df_2019$Poblacion.Total <- as.numeric(df_2019$Poblacion.Total)
+
+```
+
+
+
+```{r}
+
+# Ordenar el dataframe por la columna 'Poblacion.Total' de forma descendente
+df_2019 <- df_2019[order(df_2019$Poblacion.Total, decreasing = TRUE), ]
+
+# Seleccionar los 10 primeros países con mayor población total
+top_10 <- head(df_2019, 10)
+
+# Crear un gráfico de barras de los 10 primeros países según su población total
+barplot(top_10$Poblacion.Total, names.arg = top_10$Country, xlab = "Pais", ylab = "Poblacion Total", 
+        main = "Top 10 Paises con Mayor Poblacion Total en 2019", col = "steelblue" , las = 2, cex.axis = 0.6 , cex.names = 0.75)
+
+
+
+```
+
+* Para el 2019 ya ibamos observando la cantidad de poblacion de China e India como los mayores paises que poseen una poblacion significativamente mas alta en comparacion con los demas paises.
+
+# Tabla de Receptores
+
+```{r}
+
+head(df_receptores,3)
+
+```
+
+```{r}
+
+summary(df_expulsores)
+
+```
+
+
+```{r}
+
+df_receptores <- read.csv('receptores.csv')
+# Filtrar los datos para obtener solo los registros de 2019
+df_2020 <- subset(df_receptores, Year == 2020)
+# Eliminar ',0' al final de los valores en la columna 'Poblacion.Total'
+df_2020$Poblacion.Total <- sub(",0$", "", df_2020$Poblacion.Total)
+# Convertir la columna 'Poblacion.Total' a numérica
+df_2020$Poblacion.Total <- as.numeric(df_2020$Poblacion.Total)
+
+```
+
+```{r}
+
+# Ordenar el dataframe por la columna 'Poblacion.Total' de forma descendente
+df_2020 <- df_2020[order(df_2020$Poblacion.Total, decreasing = FALSE), ]
+
+# Seleccionar los 10 primeros países con mayor población total
+bottom_10 <- head(df_2020, 10)
+
+# Crear un gráfico de barras de los 10 primeros países según su población total
+barplot(bottom_10$Poblacion.Total, names.arg = bottom_10$Country, xlab = "Pais", ylab = "Poblacion Total", 
+        main = "Top 10 Paises con Menor Poblacion Total en 2019", col = "steelblue" , las = 2, cex.axis = 0.6 , cex.names = 0.6)
+
+```
+
+* Paises como Tuvalu, Nauru y Palau aparecen como los que tienen menor poblacion en este grafico, siendo paises de Oceania, que en resumidas cuentas son islas muy chicas territorialmente que poseen poblaciones muy reducidas.
+
+
+
+
+
+
+
+
+
